@@ -1,72 +1,44 @@
-# Memory Graph Diary V1
+# TaleWeaver: Operational Memory Graph Diary (V1 Core)
 
-A smart diary system that:
-- Stores daily memories
-- Extracts keywords
-- Builds a knowledge graph
-- Allows semantic search
+TaleWeaver is an engineering-first personal knowledge management platform that transforms raw daily text journals into an interactive semantic graph network. Instead of storing entries as isolated chronological blocks of text, TaleWeaver acts as an information retrieval pipeline: automatically parsing daily logs, extracting distinct structural entities, validating schema transformations, and mapping concept intersections locally. 
 
-## Tech Stack
-- FastAPI
-- SQLite
-- SQLAlchemy
-- Network graph logic (custom)
+Built using a modular, highly decoupled architecture, this project serves as a robust foundational ecosystem for advanced downstream integrations like local RAG (Retrieval-Augmented Generation), vector embeddings, and autonomous agent memory layers.
 
-## Run
+![System Interface Dashboard](image_daa500.png)
 
-```bash
-uvicorn app.main:app --reload
+## 🚀 Key Features
 
-Open:
-http://127.0.0.1:8000
-
+* **Schema-Validated Ingestion:** Strictly managed request payloads built with Pydantic models to verify structural consistency.
+* **Asynchronous Data Pipeline:** Fast, reliable REST API endpoints engineered with FastAPI to decouple memory ingestion from analytical rendering.
+* **Local Deterministic Text Parsing:** Efficient, zero-overhead regex-driven extraction layer engineered to process contextual entities while actively scrubbing common noise floor stopwords.
+* **Relational Mapping of Graph Invariants:** Mathematical translation of keyword pairings into deterministic bidirectional structural graphs using structural databases.
+* **Interactive Physics-Driven Visualizer:** High-performance, zoomable, draggable network diagram built natively with Vis.js inside a clean tailwind-styled presentation panel.
 
 ---
 
-# 🚀 What You Now Have (Important)
+## 🛠️ System Architecture & Folder Layout
 
-This is NOT a CRUD app.
+TaleWeaver is structured according to clean code principles, ensuring that each software component maintains a single, distinct responsibility:
 
-You now have:
-
-### ✔ Knowledge extraction pipeline
-Text → keywords → graph
-
-### ✔ Relational database design
-Memories ↔ Keywords ↔ Relationships
-
-### ✔ Graph data model
-Co-occurrence network
-
-### ✔ Search system
-Keyword-based retrieval
-
-### ✔ Extensible architecture
-Ready for:
-- embeddings (V3)
-- RAG (V4)
-- AI memory agent (V5)
-
----
-
-# If you want next step (important)
-
-I can help you upgrade this into:
-
-### 🔥 V2 (BIG upgrade)
-- React frontend
-- Graph visualization (PyVis / D3.js)
-- Interactive nodes
-- Click keyword → memories
-
-OR
-
-### 🔥 V3 (serious AI leap)
-- Replace keyword extractor with embeddings
-- Semantic search
-- “Similar memories” feature
-
-Just tell me:
-> V2 or V3
-
-and I’ll take you to the next level.
+```text
+memory-graph-diary/
+│
+├── app/
+│   ├── __init__.py
+│   ├── main.py                # FastApi initialization, routing tables, and HTTP controllers
+│   ├── models.py              # Declarative SQLAlchemy ORM database schemas
+│   ├── database.py            # SQLite engine configuration and session lifecycles
+│   ├── schemas.py             # Pydantic validation boundaries for API requests/responses
+│   ├── graph.py               # Combinatoric logic for generating node/edge collections
+│   └── keyword_extractor.py   # Deterministic parsing engine for token isolation
+│
+├── data/
+│   └── diary.db               # SQLite database file housing transaction data
+│
+├── static/
+│   └── style.css              # Custom layout properties
+│
+├── templates/
+│   └── index.html             # UI presentation layer loading interactive Canvas views
+│
+└── requirements.txt           # Explicit tracking of production ecosystem dependencies

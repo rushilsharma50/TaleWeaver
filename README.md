@@ -4,7 +4,7 @@ TaleWeaver is an engineering-first personal knowledge management platform that t
 
 Built using a modular, highly decoupled architecture, this project serves as a robust foundational ecosystem for advanced downstream integrations like local RAG (Retrieval-Augmented Generation), vector embeddings, and autonomous agent memory layers.
 
-![System Interface Dashboard](Images/Screenshot_(1760).png)
+![System Interface Dashboard](Image/Screenshot(1760).png)
 
 ## 🚀 Key Features
 

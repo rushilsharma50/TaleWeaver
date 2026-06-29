@@ -1,0 +1,18 @@
+# Google GenAI SDK
+google-genai
+pydantic
+
+# For EPUBs (Light Novels)
+ebooklib
+beautifulsoup4
+
+# For PDFs
+pdfplumber
+PyMuPDF
+
+# FastAPI Backend
+fastapi
+uvicorn
+sqlalchemy
+jinja2
+networkx

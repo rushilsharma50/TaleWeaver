@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Graph Diary</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        /* Ensures the graph container has a distinct grid background */
+        #network-shadow {
+            background-color: #1e1e24;
+            background-image: radial-gradient(#2d2d37 1px, transparent 0);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen font-sans">
+
+    <header class="border-b border-gray-800 bg-gray-900/50 backdrop-blur px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <div class="h-3 w-3 rounded-full bg-emerald-500 animate-pulse"></div>
+            <h1 class="text-xl font-bold tracking-tight text-white">TaleWeaver <span class="text-xs text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full ml-2">V1 Core</span></h1>
+        </div>
+        <div class="text-sm text-gray-400">Knowledge Graph Architecture</div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <div class="space-y-6 lg:col-span-1">
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-4 shadow-xl">
+                <h2 class="text-lg font-semibold text-gray-200">Log New Memory</h2>
+                <p class="text-xs text-gray-400 leading-relaxed">
+                    Write your daily engineering entry. The backend will parse keywords and link them into your graph network automatically.
+                </p>
+                <div>
+                    <textarea id="text" placeholder="Today I learned FastAPI. I also solved SQL JOIN questions..." 
+                        class="w-full h-40 bg-gray-950 border border-gray-800 rounded-lg p-3 text-sm text-gray-300 placeholder-gray-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all resize-none"></textarea>
+                </div>
+                <button onclick="saveMemory()" 
+                    class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm py-2.5 px-4 rounded-lg transition-all shadow-lg shadow-emerald-900/20 flex justify-center items-center cursor-pointer">
+                    Commit to Graph
+                </button>
+            </div>
+
+            <div class="bg-gray-900/50 border border-gray-800/60 rounded-xl p-4 text-xs text-gray-400 space-y-2">
+                <div class="flex justify-between"><span class="font-medium text-gray-300">Data Pipeline:</span> <span class="text-emerald-400">SQLite + SQLAlchemy</span></div>
+                <div class="flex justify-between"><span class="font-medium text-gray-300">Ingestion Invariant:</span> <span>Strict Validation (Pydantic)</span></div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2 flex flex-col h-[calc(100vh-140px)] min-h-[500px]">
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 flex flex-col flex-grow shadow-xl relative">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-lg font-semibold text-gray-200">Knowledge Network Mapping</h2>
+                    <button onclick="loadGraph()" class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1 rounded border border-gray-700 transition cursor-pointer">
+                        Sync Graph Data
+                    </button>
+                </div>
+                <div id="network-shadow" class="w-full flex-grow border border-gray-800/80 rounded-lg relative overflow-hidden">
+                    <div id="network-container" class="absolute inset-0"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let networkInstance = null;
+
+        // Initialize and load the graph immediately upon dashboard access
+        document.addEventListener("DOMContentLoaded", () => {
+            loadGraph();
+        });
+
+        // Trigger POST payload to ingestion pipeline
+        async function saveMemory() {
+            const textElement = document.getElementById("text");
+            const text = textElement.value.trim();
+            if (!text) return;
+
+            try {
+                const res = await fetch("/memory", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text })
+                });
+
+                if (res.ok) {
+                    textElement.value = ""; // Clear on success
+                    await loadGraph();      // Refresh graph nodes and edges live
+                } else {
+                    console.error("Pipeline rejection occurred.");
+                }
+            } catch (err) {
+                console.error("Failed to connect to ingestion endpoint:", err);
+            }
+        }
+
+        // Fetch graph structures and map to Vis.js configuration
+        async function loadGraph() {
+            try {
+                const res = await fetch("/graph");
+                const data = await res.json();
+
+                // Format nodes array for Vis.js
+                const nodes = data.nodes.map(nodeName => ({
+                    id: nodeName,
+                    label: nodeName,
+                    shape: 'dot',
+                    size: 16,
+                    font: { color: '#e5e7eb', size: 14, face: 'sans-serif' },
+                    color: {
+                        background: '#059669', // Emerald 600
+                        border: '#10b981',     // Emerald 500
+                        highlight: { background: '#10b981', border: '#34d399' }
+                    }
+                }));
+
+                // Format edges array (ensure unique ID mapping)
+                const edges = data.edges.map((edge, index) => ({
+                    id: `e_${index}`,
+                    from: edge.from,
+                    to: edge.to,
+                    color: { color: '#4b5563', highlight: '#9ca3af' }, // Muted gray tracking
+                    width: 1.5
+                }));
+
+                const container = document.getElementById("network-container");
+                const graphData = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
+                
+                // Advanced Physics tuning for non-overlapping node distributions
+                const options = {
+                    physics: {
+                        stabilization: true,
+                        barnesHut: {
+                            gravitationalConstant: -3000,
+                            springLength: 95,
+                            springConstant: 0.04
+                        }
+                    },
+                    interaction: { hover: true, dragNodes: true }
+                };
+
+                if (networkInstance) {
+                    networkInstance.destroy();
+                }
+                networkInstance = new vis.Network(container, graphData, options);
+
+            } catch (err) {
+                console.error("Could not render the operational matrix graph:", err);
+            }
+        }
+    </script>
+</body>
+</html>
